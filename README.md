@@ -1,15 +1,20 @@
 # EPUB Translator — vLLM + Qwen3.5
 
-Self-hosted EN→FR book translation with grammar-constrained decoding: one
-command extracts an EPUB, translates every paragraph concurrently, and
-repacks a valid EPUB — no cloud API, no data leaving the machine.
+Self-hosted EN→FR book translation, one command from EPUB to EPUB. Two
+things it's built around:
 
-Built to translate books for my own reading list, and to work through the
-practical side of running a local LLM as a real pipeline rather than a demo:
-constraining generation with a regex grammar so the model can't corrupt the
-markup, disabling Qwen3.5's `<think>` mode to keep per-paragraph latency
-sane, and bounding async concurrency with a semaphore instead of firing
-everything at vLLM at once.
+- **Grammar-guided decoding** — vLLM enforces a regex grammar on every
+  generation, so the output is constrained to Latin script + punctuation.
+  That kills a real Qwen3.5 failure mode where a paragraph randomly comes
+  back with stray Chinese characters mixed in.
+- **Batched concurrency** — every paragraph in a file is dispatched at once
+  via `asyncio.gather`, bounded by a semaphore, so vLLM's continuous
+  batching is saturated instead of translating one paragraph at a time.
+  This is what makes a full book translate in minutes, not hours.
+
+Also disables Qwen3.5's `<think>` mode (dead weight on short paragraphs),
+and repacks a spec-valid EPUB when it's done — no cloud API, no data
+leaving the machine.
 
 ## How it works
 
