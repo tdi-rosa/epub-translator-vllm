@@ -1,13 +1,15 @@
-# epub-translator-vllm-qwen3.5
+# EPUB Translator — vLLM + Qwen3.5
 
-Translates EPUB books from English to French, end to end: unzip the EPUB,
-translate every paragraph/heading/list-item with a locally-hosted LLM, and
-repack a valid EPUB — one command.
+Self-hosted EN→FR book translation with grammar-constrained decoding: one
+command extracts an EPUB, translates every paragraph concurrently, and
+repacks a valid EPUB — no cloud API, no data leaving the machine.
 
-Built to translate books for my own reading list. The model runs locally
-through [vLLM](https://github.com/vllm-project/vllm) serving
-[Qwen3.5-9B-AWQ](https://huggingface.co/QuantTrio/Qwen3.5-9B-AWQ), so there's
-no per-page API cost and no data leaving the machine.
+Built to translate books for my own reading list, and to work through the
+practical side of running a local LLM as a real pipeline rather than a demo:
+constraining generation with a regex grammar so the model can't corrupt the
+markup, disabling Qwen3.5's `<think>` mode to keep per-paragraph latency
+sane, and bounding async concurrency with a semaphore instead of firing
+everything at vLLM at once.
 
 ## How it works
 
